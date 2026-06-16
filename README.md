@@ -12,6 +12,9 @@
 ### Быстрый старт
 
 ```bash
+# Для запуска нужно перейти в папку docker
+cd message-notifications/docker
+
 # Запускаем все сервисы в фоновом режиме
 docker-compose up -d --build
 
