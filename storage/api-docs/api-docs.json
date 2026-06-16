@@ -1,0 +1,300 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Message Notifications API",
+        "description": "API для управления уведомлениями и массовой отправкой сообщений",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local server"
+        }
+    ],
+    "paths": {
+        "/api/v1/mass-messages/send": {
+            "post": {
+                "tags": [
+                    "Mass Messages"
+                ],
+                "summary": "Запустить массовую отправку сообщений",
+                "description": "Создает новую запись о массовой отправки SMS или Email-сообщений.",
+                "operationId": "023c944108def3cfc70265cdab923e06",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "channel",
+                                    "message",
+                                    "user_ids"
+                                ],
+                                "properties": {
+                                    "channel": {
+                                        "description": "Канал связи для отправки сообщения (SMS или Email)",
+                                        "type": "string",
+                                        "enum": [
+                                            "sms",
+                                            "email"
+                                        ]
+                                    },
+                                    "message": {
+                                        "description": "Текст сообщения для отправки",
+                                        "type": "string",
+                                        "maxLength": 10000
+                                    },
+                                    "user_ids": {
+                                        "description": "Массив идентификаторов получателей сообщения",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "minItems": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Массовая отправка успешно запущена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "channel": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "sms",
+                                                        "email"
+                                                    ]
+                                                },
+                                                "message_count": {
+                                                    "type": "integer"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "pending",
+                                                        "processing",
+                                                        "completed",
+                                                        "failed"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка валидации входных данных"
+                    },
+                    "422": {
+                        "description": "Валидация не пройдена"
+                    }
+                }
+            }
+        },
+        "/api/v1/mass-messages/{id}/status": {
+            "get": {
+                "tags": [
+                    "Mass Messages"
+                ],
+                "summary": "Получить статус массовой отправки",
+                "description": "Получает информацию о статусе запущенной массовой отправки.",
+                "operationId": "432d52c61676d3bd9ea51a2d342333b2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID записи о массовой отправке",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус успешно получен",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "channel": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "sms",
+                                                        "email"
+                                                    ]
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                },
+                                                "user_ids_count": {
+                                                    "type": "integer"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "pending",
+                                                        "processing",
+                                                        "completed",
+                                                        "failed"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Запись не найдена"
+                    }
+                }
+            }
+        },
+        "/api/v1/mass-messages": {
+            "get": {
+                "tags": [
+                    "Mass Messages"
+                ],
+                "summary": "Получить список массовых отправок",
+                "description": "Получает список всех запущенных массовых отправок с фильтрацией.",
+                "operationId": "b6ac2902613b971aae6e5abfbc4ec000",
+                "parameters": [
+                    {
+                        "name": "channel",
+                        "in": "query",
+                        "description": "Фильтр по каналу связи (SMS или Email)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "sms",
+                                "email"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Количество записей для возврата (макс. 50)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список успешно получен",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "channel": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "sms",
+                                                                    "email"
+                                                                ]
+                                                            },
+                                                            "message_preview": {
+                                                                "type": "string",
+                                                                "maxLength": 100
+                                                            },
+                                                            "user_ids_count": {
+                                                                "type": "integer"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "pending",
+                                                                    "processing",
+                                                                    "completed",
+                                                                    "failed"
+                                                                ]
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверные параметры запроса"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Mass Messages",
+            "description": "Mass Messages"
+        }
+    ]
+}

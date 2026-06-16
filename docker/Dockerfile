@@ -17,4 +17,10 @@ RUN pecl install redis && docker-php-ext-enable redis
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# Копируем entrypoint.sh и nginx конфиг внутрь образа
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 WORKDIR /var/www
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

@@ -36,6 +36,12 @@ php artisan key:generate
 
 # Выполнить миграцию
 php artisan migrate
+
+# Генерация swagger документации
+php artisan l5-swagger:generate
+
+# Обновить конфиги/роуты и весь проект
+php artisan optimize
 ```
 
 ### Доступ к сервисам
