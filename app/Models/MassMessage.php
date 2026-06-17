@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $id
  * @property string $channel
+ * @property string $priority
  * @property string $message
  * @property string $status
  * @property MessageRecipient[] $recipients
@@ -21,6 +22,7 @@ class MassMessage extends Model
 
     protected $fillable = [
         'channel',
+        'priority',
         'message',
         'status',
     ];

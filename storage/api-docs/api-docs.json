@@ -27,6 +27,7 @@
                             "schema": {
                                 "required": [
                                     "channel",
+                                    "priority",
                                     "message",
                                     "user_ids"
                                 ],
@@ -37,6 +38,15 @@
                                         "enum": [
                                             "sms",
                                             "email"
+                                        ]
+                                    },
+                                    "priority": {
+                                        "description": "Приоритет доставки: low=маркетинг, normal=обычные уведомления, high=транзакционные (обработка вне очереди)",
+                                        "type": "string",
+                                        "enum": [
+                                            "low",
+                                            "normal",
+                                            "high"
                                         ]
                                     },
                                     "message": {
@@ -78,6 +88,15 @@
                                                     "enum": [
                                                         "sms",
                                                         "email"
+                                                    ]
+                                                },
+                                                "priority": {
+                                                    "description": "Приоритет отправки",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "low",
+                                                        "normal",
+                                                        "high"
                                                     ]
                                                 },
                                                 "message_count": {
@@ -153,6 +172,15 @@
                                                     "enum": [
                                                         "sms",
                                                         "email"
+                                                    ]
+                                                },
+                                                "priority": {
+                                                    "description": "Приоритет отправки",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "low",
+                                                        "normal",
+                                                        "high"
                                                     ]
                                                 },
                                                 "message": {
@@ -246,6 +274,15 @@
                                                                 "enum": [
                                                                     "sms",
                                                                     "email"
+                                                                ]
+                                                            },
+                                                            "priority": {
+                                                                "description": "Приоритет отправки",
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "low",
+                                                                    "normal",
+                                                                    "high"
                                                                 ]
                                                             },
                                                             "message_preview": {
