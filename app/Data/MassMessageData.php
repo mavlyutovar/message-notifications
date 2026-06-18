@@ -9,6 +9,7 @@ class MassMessageData extends Data
 {
     public function __construct(
         public string $channel,
+        public string $uuid,
         public string $priority = PriorityEnum::LOW->value,
         public string $message,
         public array $userIds,

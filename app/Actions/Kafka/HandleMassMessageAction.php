@@ -1,50 +1,40 @@
 <?php
 
-namespace App\Actions;
+namespace App\Actions\Kafka;
 
-use App\Kafka\KafkaProducer;
+use App\Data\SendMessageData;
+use App\Enums\MassMessageStatusEnum;
+use App\Enums\MessageRecipientStatusEnum;
+use App\Jobs\SendRecipientJob;
 use App\Services\MassMessageService;
-use App\Data\MassMessageData;
+use App\Services\MessageRecipientService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 
-final readonly class CreateMassMessageAction
+final readonly class HandleMassMessageAction
 {
     public function __construct(
-        private MassMessageService      $massMessageService,
-        private KafkaProducer $kafkaProducer,
+        private MassMessageService $massMessageService,
+        private MessageRecipientService $messageRecipientService,
     ) {}
 
-    public function handle(MassMessageData $data): array
+    public function handle(int $messageId): void
     {
-        if ($this->massMessageService->findByUuid($data->uuid)) {
-            return [
-                'success' => false,
-                'error' => 'Сообщение уже сохранено',
-            ];
+        $massMessage = $this->massMessageService->findWithRecipients($messageId);
+
+        $this->massMessageService->updateStatus($massMessage->id, MassMessageStatusEnum::PROCESSING->value);
+        $recipientIds = [];
+        foreach ($massMessage->recipients as $recipient) {
+            $recipientIds[] = $recipient->id;
+
+            SendRecipientJob::dispatch(
+                new SendMessageData(
+                    channel: $massMessage->channel,
+                    message: $massMessage->message,
+                    recipientId: $recipient->id,
+                )
+            );
         }
-
-        try {
-            $massMessage = $this->massMessageService->create($data);
-
-            if (isset($massMessage) && isset($massMessage->priority)) {
-                $this->kafkaProducer->send($massMessage->priority, ['mass_message_id' => $massMessage->id]);
-            }
-
-            return [
-                'success' => true,
-                'data' => [
-                    'id' => $massMessage->id,
-                    'channel' => $massMessage->channel,
-                    'priority' => $massMessage->priority,
-                    'message_count' => count($data->userIds),
-                    'status' => $massMessage->status,
-                    'created_at' => $massMessage->created_at->toDateTimeString(),
-                ],
-            ];
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'error' => 'Не удалось создать массовую отправку: ' . $e->getMessage(),
-            ];
-        }
+        $this->messageRecipientService->updateStatuses($recipientIds, MessageRecipientStatusEnum::PROCESSING->value);
     }
 }

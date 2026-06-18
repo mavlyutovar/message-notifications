@@ -2,54 +2,50 @@
 
 namespace App\Actions;
 
-use App\Models\MassMessage as MassMessageModel;
+use App\Enums\MessageRecipientStatusEnum;
+use App\Kafka\KafkaProducer;
+use App\Models\MessageRecipient;
 use App\Services\MassMessageService;
-use App\Services\MessageRecipientService;
-use App\Services\UserService;
 use App\Data\MassMessageData;
-use App\Data\MassMessageRecipientData;
-use App\Enums\MassMessageStatusEnum;
-use Illuminate\Support\Facades\Log;
+use App\Services\MessageRecipientService;
 
 final readonly class CreateMassMessageAction
 {
     public function __construct(
-        private MassMessageService      $massMessageService,
-        private MessageRecipientService $recipientService,
-        private UserService             $userService,
+        private KafkaProducer $kafkaProducer,
+        private MassMessageService $massMessageService,
+        private MessageRecipientService $messageRecipientService,
     ) {}
 
-    public function execute(MassMessageData $data): array
+    public function handle(MassMessageData $data): array
     {
+        if ($this->massMessageService->findByUuid($data->uuid)) {
+            return [
+                'success' => false,
+                'error' => 'Сообщение уже сохранено',
+            ];
+        }
+
         try {
             $massMessage = $this->massMessageService->create($data);
 
             foreach ($data->userIds as $userId) {
-                try {
-                    $user = $this->userService->find($userId);
-
-                    if (!$user) {
-                        continue;
-                    }
-
-                    $this->recipientService->create(
-                        new MassMessageRecipientData(
-                            mass_message_id: $massMessage->id,
-                            user_id: $user->id,
-                            status: 'queued',
-                            attempts: 0,
-                            last_error: null,
-                        )
-                    );
-                } catch (\Exception $e) {
-                    Log::warning('Ошибка при создании получателя', [
-                        'user_id' => $userId,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
+                $recipients[] = [
+                    'mass_message_id' => $massMessage->id,
+                    'user_id' => $userId,
+                    'status' => MessageRecipientStatusEnum::QUEUED->value,
+                    'attempts' => 0,
+                    'last_error' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
 
-            $this->massMessageService->updateStatus($massMessage->id, MassMessageStatusEnum::PROCESSING->value);
+            $this->messageRecipientService->insertMany($recipients);
+
+            if (isset($massMessage) && isset($massMessage->priority)) {
+                $this->kafkaProducer->send($massMessage->priority, ['mass_message_id' => $massMessage->id]);
+            }
 
             return [
                 'success' => true,
