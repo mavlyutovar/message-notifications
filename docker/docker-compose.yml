@@ -5,8 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: notification-app
+    init: true
+    stop_grace_period: 30s
     volumes:
       - ../:/var/www
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -16,10 +19,13 @@ services:
         condition: service_started
     networks:
       - app-network
+    restart: unless-stopped
 
   nginx:
     image: nginx:latest
     container_name: notification-nginx
+    init: true
+    stop_grace_period: 10s
     ports:
       - "8000:80"
     volumes:
@@ -29,10 +35,67 @@ services:
       - app
     networks:
       - app-network
+    restart: unless-stopped
+
+  queue-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notification-queue-worker
+    init: true
+    stop_grace_period: 30s
+    working_dir: /var/www
+    volumes:
+      - ../:/var/www
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+    depends_on:
+      - redis
+      - app
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  kafka-consumer-low:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notification-kafka-low
+    init: true
+    stop_grace_period: 30s
+    working_dir: /var/www
+    volumes:
+      - ../:/var/www
+    command: php artisan kafka:consume:low
+    depends_on:
+      - kafka
+      - app
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  kafka-consumer-high:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notification-kafka-high
+    init: true
+    stop_grace_period: 30s
+    working_dir: /var/www
+    volumes:
+      - ../:/var/www
+    command: php artisan kafka:consume:high
+    depends_on:
+      - kafka
+      - app
+    networks:
+      - app-network
+    restart: unless-stopped
 
   postgres:
     image: postgres:17
     container_name: notification-postgres
+    init: true
+    stop_grace_period: 30s
     environment:
       POSTGRES_DB: notifications
       POSTGRES_USER: postgres
@@ -43,6 +106,7 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app-network
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -52,14 +116,19 @@ services:
   redis:
     image: redis:7-alpine
     container_name: notification-redis
+    init: true
+    stop_grace_period: 10s
     ports:
       - "6379:6379"
     networks:
       - app-network
+    restart: unless-stopped
 
   kafka:
     image: bitnamilegacy/kafka:latest
     container_name: notification-kafka
+    init: true
+    stop_grace_period: 30s
     ports:
       - "9092:9092"
     environment:
@@ -73,9 +142,11 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     networks:
       - app-network
+    restart: unless-stopped
 
 volumes:
   pgdata:
 
 networks:
   app-network:
+    driver: bridge

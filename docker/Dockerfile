@@ -22,5 +22,3 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 WORKDIR /var/www
-
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

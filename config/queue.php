@@ -31,6 +31,15 @@ return [
 
     'connections' => [
 
+        // Очередь для обработки доставки сообщений (notifications)
+        'notifications' => [
+            'driver' => 'database',
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => env('NOTIFICATIONS_QUEUE', 'default'),
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            'after_commit' => false,
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],

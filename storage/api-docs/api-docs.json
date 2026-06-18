@@ -40,6 +40,10 @@
                                             "email"
                                         ]
                                     },
+                                    "uuid": {
+                                        "description": "UUID сообщения для определения дубликатов",
+                                        "type": "string"
+                                    },
                                     "priority": {
                                         "description": "Приоритет доставки: low=маркетинг, normal=обычные уведомления, high=транзакционные (обработка вне очереди)",
                                         "type": "string",

@@ -10,5 +10,8 @@ php artisan optimize
 # Запускаем миграции (команда будет ждать, пока Postgres поднимется)
 php artisan migrate --force
 
-# Запускаем основной процесс контейнера 
+# Заполняем БД тестовыми данными
+php artisan db:seed --class=DatabaseSeeder
+
+# Запускаем основной процесс контейнера
 exec php-fpm
