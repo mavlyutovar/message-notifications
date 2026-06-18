@@ -49,10 +49,11 @@ php artisan optimize
 
 ### Доступ к сервисам
 
-- Web приложение: http://localhost:8000 (порт 8000)
-- PostgreSQL: localhost:5432 (порт 5432)
-- Redis: localhost:6379 (порт 6379)
-- Kafka: localhost:9092 (порт 9092)
+- Web приложение: http://localhost:8000
+- Swagger: http://localhost:8000/api/documentation
+- PostgreSQL: localhost:5432 
+- Redis: localhost:6379 
+- Kafka: localhost:9092 
 
 ### Управление контейнерами
 
@@ -75,19 +76,5 @@ docker-compose restart app
 
 ### Настройка Kafka
 
-По умолчанию создаются темы автоматически (`KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true`).
+По умолчанию темы создаются автоматически.
 
-Для ручного создания тем:
-
-```bash
-docker exec notification-kafka kafka-topics.sh \
-  --create \
-  --topic your-topic-name \
-  --bootstrap-server localhost:9092 \
-  --partitions 3 \
-  --replication-factor 1
-```
-
-### Настройка PHP
-
-Контейнер включает расширения для работы с PostgreSQL (`pdo_pgsql`) и Kafka (`rdkafka`), а также Redis.
