@@ -40,6 +40,11 @@ class MassMessageController extends Controller
                             enum: ['sms', 'email']
                         ),
                         new OA\Property(
+                            property: 'uuid',
+                            description: 'UUID сообщения для определения дубликатов',
+                            type: 'string',
+                        ),
+                        new OA\Property(
                             property: 'priority',
                             description: 'Приоритет доставки: low=маркетинг, normal=обычные уведомления, high=транзакционные (обработка вне очереди)',
                             type: 'string',
@@ -75,7 +80,6 @@ class MassMessageController extends Controller
                             new OA\Property(property: 'success', type: 'boolean'),
                             new OA\Property(
                                 property: 'data',
-                                type: 'object',
                                 properties: [
                                     new OA\Property(property: 'id', type: 'integer'),
                                     new OA\Property(property: 'channel', type: 'string', enum: ['sms', 'email']),
@@ -91,7 +95,8 @@ class MassMessageController extends Controller
                                         type: 'string',
                                         format: 'date-time'
                                     )
-                                ]
+                                ],
+                                type: 'object'
                             )
                         ],
                         type: 'object'
@@ -104,19 +109,15 @@ class MassMessageController extends Controller
     )]
     public function send(MassMessageRequest $request): JsonResponse
     {
-        $channel = $request->input('channel');
-        $message = $request->input('message');
-        $userIds = $request->input('user_ids');
-        $priority = $request->input('priority');
-
         $massMessageData = new MassMessageData(
-            channel: $channel,
-            message: $message,
-            userIds: $userIds,
-            priority: $priority,
+            channel: $request->input('channel'),
+            uuid: $request->input('uuid'),
+            priority: $request->input('priority'),
+            message: $request->input('message'),
+            userIds: $request->input('user_ids')
         );
 
-        $result = $this->createAction->execute($massMessageData);
+        $result = $this->createAction->handle($massMessageData);
 
         if (!$result['success']) {
             return response()->json(['error' => $result['error']], 422);
@@ -153,7 +154,6 @@ class MassMessageController extends Controller
                             new OA\Property(property: 'success', type: 'boolean'),
                             new OA\Property(
                                 property: 'data',
-                                type: 'object',
                                 properties: [
                                     new OA\Property(property: 'id', type: 'integer'),
                                     new OA\Property(property: 'channel', type: 'string', enum: ['sms', 'email']),
@@ -170,7 +170,8 @@ class MassMessageController extends Controller
                                         type: 'string',
                                         format: 'date-time'
                                     )
-                                ]
+                                ],
+                                type: 'object'
                             )
                         ],
                         type: 'object'

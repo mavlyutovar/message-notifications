@@ -16,6 +16,19 @@ class MassMessageRepository
         return MassMessage::query()->find($id);
     }
 
+    public function findWithRecipients(int $id): ?MassMessage
+    {
+        return MassMessage::query()
+            ->orderByDesc('created_at')
+            ->with(['recipients'])
+            ->find($id);
+    }
+
+    public function findByUuid(string $uuid): bool
+    {
+        return MassMessage::query()->where('idempotency_key', $uuid)->exists();
+    }
+
     public function updateStatus(int $massMessageId, string $status): void
     {
         $model = MassMessage::query()->findOrFail($massMessageId);

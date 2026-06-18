@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $priority
  * @property string $message
  * @property string $status
+ * @property string $idempotency_key
  * @property MessageRecipient[] $recipients
  * @property \DateTimeInterface $created_at
  * @property ?\DateTimeInterface $updated_at
@@ -25,6 +26,7 @@ class MassMessage extends Model
         'priority',
         'message',
         'status',
+        'idempotency_key',
     ];
 
     protected function casts(): array
@@ -32,6 +34,7 @@ class MassMessage extends Model
         return [
             'id' => 'integer',
             'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 

@@ -24,6 +24,7 @@ class MassMessageRequest extends FormRequest
         return [
             'channel' => ['required', Rule::enum(MassMessageChannelEnum::class)],
             'priority' => ['required', Rule::enum(PriorityEnum::class)],
+            'uuid' => ['required', 'uuid', 'max:64'],
             'message' => ['required', 'string', 'max:10000'],
             'user_ids' => ['required', 'array', 'min:1'],
             'user_ids.*' => ['required', 'integer', 'exists:users,id'],
@@ -37,20 +38,14 @@ class MassMessageRequest extends FormRequest
             'channel.in' => 'Допустимые каналы: sms или email.',
             'priority.required' => 'Приоритет доставки обязателен для заполнения.',
             'priority.in' => 'Допустимые приоритеты: low, normal, high.',
+            'uuid.required' => 'uuid сообщения объязательно',
+            'uuid.uuid' => 'uuid формат неверный',
             'message.required' => 'Текст сообщения обязателен для заполнения.',
             'message.max' => 'Максимальная длина сообщения: 10000 символов.',
             'user_ids.required' => 'Массив идентификаторов получателей обязателен.',
             'user_ids.array' => 'Поле user_ids должно быть массивом.',
             'user_ids.min' => 'Должен быть указан хотя бы один получатель.',
             'user_ids.*.exists' => 'Пользователь с ID :value не найден.',
-        ];
-    }
-    public function attributes(): array
-    {
-        return [
-            'channel' => 'канал связи',
-            'message' => 'текст сообщения',
-            'user_ids' => 'идентификаторы получателей',
         ];
     }
 }

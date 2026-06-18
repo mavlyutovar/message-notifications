@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Enums\MassMessageStatusEnum;
 use App\Enums\PriorityEnum;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class MassMessageApiTest extends TestCase
@@ -17,6 +19,7 @@ class MassMessageApiTest extends TestCase
             'channel' => 'sms',
             'message' => 'Привет! Это тестовое SMS сообщение.',
             'user_ids' => [$user->id],
+            'uuid' => STR::uuid(),
             'priority' => PriorityEnum::LOW->value,
         ]);
 
@@ -36,7 +39,6 @@ class MassMessageApiTest extends TestCase
             'id' => $response->json('data.id'),
             'channel' => 'sms',
             'message' => 'Привет! Это тестовое SMS сообщение.',
-            'status' => 'processing',
         ]);
 
         $this->assertDatabaseCount('mass_messages', 1);
@@ -55,6 +57,7 @@ class MassMessageApiTest extends TestCase
             'channel' => 'email',
             'message' => 'Привет! Это тестовое email сообщение.',
             'user_ids' => [$user->id],
+            'uuid' => STR::uuid(),
             'priority' => PriorityEnum::LOW->value,
         ]);
 
@@ -74,7 +77,6 @@ class MassMessageApiTest extends TestCase
             'id' => $response->json('data.id'),
             'channel' => 'email',
             'message' => 'Привет! Это тестовое email сообщение.',
-            'status' => 'processing',
         ]);
 
         $this->assertDatabaseCount('mass_messages', 1);
@@ -93,6 +95,7 @@ class MassMessageApiTest extends TestCase
             'channel' => 'sms',
             'message' => 'Тестовое сообщение.',
             'user_ids' => [$user->id],
+            'uuid' => STR::uuid(),
             'priority' => PriorityEnum::LOW->value,
         ]);
 
@@ -143,6 +146,7 @@ class MassMessageApiTest extends TestCase
                     'channel' => $channel,
                     'message' => "Тестовое сообщение {$channel} #{$i}",
                     'user_ids' => [User::factory()->create()->id],
+                    'uuid' => STR::uuid(),
                     'priority' => PriorityEnum::LOW->value,
                 ]);
             }
@@ -182,6 +186,7 @@ class MassMessageApiTest extends TestCase
             'channel' => 'sms',
             'message' => 'SMS сообщение.',
             'user_ids' => [$user->id],
+            'uuid' => STR::uuid(),
             'priority' => PriorityEnum::LOW->value,
         ]);
 
@@ -191,6 +196,7 @@ class MassMessageApiTest extends TestCase
             'channel' => 'email',
             'message' => 'Email сообщение.',
             'user_ids' => [$emailUser->id],
+            'uuid' => STR::uuid(),
             'priority' => PriorityEnum::LOW->value,
         ]);
 

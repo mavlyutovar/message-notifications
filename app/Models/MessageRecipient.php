@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $attempts
  * @property ?string $last_error
  * @property MassMessage $massMessage
- * @property MessageDeliveryLog[] $deliveryLogs
+ * @property User $user
  * @property \DateTimeInterface $created_at
  * @property ?\DateTimeInterface $updated_at
  */
@@ -50,8 +50,8 @@ class MessageRecipient extends Model
         return $this->belongsTo(MassMessage::class);
     }
 
-    public function deliveryLogs(): HasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(MessageDeliveryLog::class);
+        return $this->belongsTo(User::class);
     }
 }
